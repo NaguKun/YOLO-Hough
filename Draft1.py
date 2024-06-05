@@ -64,6 +64,7 @@ while True:
     # Find contours
     contours, _ = cv.findContours(fg_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
+    new_trackers = []
     for contour in contours:
         if cv.contourArea(contour) > 500:  # Filter small contours
             x, y, w, h = cv.boundingRect(contour)
@@ -74,12 +75,15 @@ while True:
             for tracker in trackers:
                 if cv.norm(tracker['position'], center) < 50:
                     tracker['position'] = center
-                    tracker['age'] += 1
+                    tracker['age'] = 0
+                    new_trackers.append(tracker)
                     matched = True
                     break
 
             if not matched:
-                trackers.append({'position': center, 'age': 0, 'crossed': False})
+                new_trackers.append({'position': center, 'age': 0, 'crossed': False})
+
+    trackers = new_trackers
 
     # Remove old trackers
     trackers = [tracker for tracker in trackers if tracker['age'] < 30]
